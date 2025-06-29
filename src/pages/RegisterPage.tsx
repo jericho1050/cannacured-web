@@ -140,7 +140,7 @@ export default function RegisterPage() {
             onSubmit={registerClicked}
           >
             <TitleContainer>
-              {t("registerPage.title", { appName: "Nerimity" })}
+              {t("registerPage.title", { appName: "CannaCured" })}
             </TitleContainer>
             <NoticesContainer gap={5}>
               <span style={{ "margin-bottom": "6px" }}>
