@@ -68,12 +68,16 @@ const ButtonsContainer = styled("div")`
   a {
     text-decoration: none;
     div {
-      width: 130px;
+      width: 200px;
+      height: 56px;
+      font-size: 18px;
+      font-weight: 700;
     }
   }
   .get-started-button {
     background: #4c93ff;
     background: linear-gradient(to right, #4c93ff 0%, #6a5dff 100%);
+    padding: 1em 2em;
   }
 `;
 
@@ -105,19 +109,19 @@ export default function HomePage() {
       <PageHeader />
       <Content class="content">
         <TopContainer class="top-container">
-          <VersionAnchor
+          {/* <VersionAnchor
             href={releaseLink}
             target="_blank"
             rel="noopener noreferrer"
           >
             {env.APP_VERSION || "Unknown Version"}
-          </VersionAnchor>
+          </VersionAnchor> */}
 
-          <Text class="slogan" size={56} bold>
+          <Text class="slogan" size={72} bold>
             {t("homePage.slogan")}
           </Text>
           <Text
-            size={20}
+            size={26}
             opacity={0.7}
             style={{ "margin-top": "15px", "margin-bottom": "15px" }}
           >
@@ -132,7 +136,7 @@ export default function HomePage() {
                 color={"white"}
               />
             </a>
-            <a
+            {/* <a
               href="https://github.com/Nerimity/nerimity-web"
               target="_blank"
               rel="noopener noreferrer"
@@ -142,8 +146,15 @@ export default function HomePage() {
                 iconName="code"
                 label={t("homePage.viewGitHubButton")!}
               />
-            </a>
+            </a> */}
           </ButtonsContainer>
+          <Text
+            size={14}
+            opacity={0.69}
+            style={{ "margin-top": "20px" }}
+          >
+            age must be 21+
+          </Text>
         </TopContainer>
       </Content>
       <ArtImage src="./assets/home-page-art.svg" alt="" />
