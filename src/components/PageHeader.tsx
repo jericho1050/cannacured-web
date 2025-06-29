@@ -14,15 +14,13 @@ import Avatar from "./ui/Avatar";
 
 const HeaderContainer = styled("header")`
   display: flex;
-  height: 58px;
+  height: 69px;
   flex-shrink: 0;
   background-color: var(--pane-color);
   border: solid 1px rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  max-width: 800px;
   width: 100%;
   align-self: center;
-  margin-top: 14px;
   box-sizing: border-box;
 
   @media (max-width: 820px) {
@@ -59,11 +57,11 @@ const Title = styled("div")`
 `;
 
 const Logo = styled("img")`
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.86);
-  backdrop-filter: blur(34px);
+  width: auto;
+  height: 100%;
+  padding-top: 1em;
+  padding-bottom: 1.5em;
+  filter: invert(1);
 `;
 
 const NavigationContainer = styled("nav")`
@@ -151,7 +149,7 @@ export default function PageHeader(props: { hideAccountInfo?: boolean }) {
     <HeaderContainer class="header-container">
       <A href="/" class={titleContainerStyle}>
         <Logo src={appLogoUrl()} alt="logo" />
-        <Title>Nerimity</Title>
+        {/* <Title>Nerimity</Title> */}
       </A>
       <Show when={!props.hideAccountInfo}>
         <Switch fallback={<LogInLogOutSkeleton />}>

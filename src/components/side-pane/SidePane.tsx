@@ -35,6 +35,7 @@ export default function SidePane(props: { class?: string }) {
   let containerEl: HTMLDivElement | undefined;
   const { createPortal } = useCustomPortal();
   const { isMobileWidth } = useWindowProperties();
+  const { account } = useStore();
 
   const showAddServerModal = () => {
     createPortal?.((close) => <AddServerModal close={close} />);
@@ -67,14 +68,17 @@ export default function SidePane(props: { class?: string }) {
       </Show>
       <div class={style.scrollable}>
         <ServerList size={resizeBar.width()} />
-        <Tooltip tooltip="Add Server">
-          <SidebarItemContainer onClick={showAddServerModal}>
-            <Icon
-              name="add_box"
-              size={resizeBar.width() - resizeBar.width() * 0.378}
-            />
-          </SidebarItemContainer>
-        </Tooltip>
+        {/* Admin-only Add Server button */}
+        <Show when={account.hasModeratorPerm()}>
+          <Tooltip tooltip="Add Server">
+            <SidebarItemContainer onClick={showAddServerModal}>
+              <Icon
+                name="add_box"
+                size={resizeBar.width() - resizeBar.width() * 0.378}
+              />
+            </SidebarItemContainer>
+          </Tooltip>
+        </Show>
       </div>
       <UpdateItem size={resizeBar.width()} />
       <Show when={!isMobileWidth()}>

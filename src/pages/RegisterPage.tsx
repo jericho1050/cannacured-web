@@ -203,12 +203,14 @@ export default function RegisterPage() {
               error={error()}
               onText={setConfirmPassword}
             />
-            <Turnstile
-              ref={turnstileRef}
-              sitekey={env.TURNSTILE_SITEKEY}
-              onVerify={(token) => (verifyToken = token)}
-              autoResetOnExpire={true}
-            />
+            <Show when={env.TURNSTILE_SITEKEY}>
+              <Turnstile
+                ref={turnstileRef}
+                sitekey={env.TURNSTILE_SITEKEY!}
+                onVerify={(token) => (verifyToken = token)}
+                autoResetOnExpire={true}
+              />
+            </Show>
             <Show
               when={
                 !error().path ||

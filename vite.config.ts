@@ -35,5 +35,12 @@ export default defineConfig({
     host: true,
     port: 3000,
     open: true,
+    proxy: {
+      "/cdn": {
+        target: "http://localhost:8003",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/cdn/, ""),
+      },
+    },
   },
 });

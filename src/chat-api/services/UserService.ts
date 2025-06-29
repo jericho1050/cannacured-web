@@ -143,7 +143,7 @@ export async function registerRequest(
       email,
       username,
       password,
-      token,
+      ...(token && { token }),
     },
   });
 }

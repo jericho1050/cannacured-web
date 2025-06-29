@@ -8,7 +8,6 @@ import {
   RawPublicServer,
   RawServer,
   RawServerRole,
-  RawServerWelcomeAnswer,
   RawServerWelcomeQuestion,
   RawUser,
   RawServerFolder,

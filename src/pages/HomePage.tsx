@@ -49,7 +49,7 @@ const TopContainer = styled("div")`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 490px;
+  height: 600px;
   text-align: center;
   flex-shrink: 0;
   .slogan {
@@ -113,13 +113,13 @@ export default function HomePage() {
             {env.APP_VERSION || "Unknown Version"}
           </VersionAnchor>
 
-          <Text class="slogan" size={36} bold>
+          <Text class="slogan" size={56} bold>
             {t("homePage.slogan")}
           </Text>
           <Text
-            size={18}
+            size={20}
             opacity={0.7}
-            style={{ "margin-top": "10px", "margin-bottom": "10px" }}
+            style={{ "margin-top": "15px", "margin-bottom": "15px" }}
           >
             {t("homePage.subslogan")}
           </Text>
@@ -144,9 +144,7 @@ export default function HomePage() {
               />
             </a>
           </ButtonsContainer>
-          <PlatformDownloadLinks />
         </TopContainer>
-        <FeatureList />
       </Content>
       <ArtImage src="./assets/home-page-art.svg" alt="" />
       <PageFooter />
