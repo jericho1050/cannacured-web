@@ -67,13 +67,13 @@ function EditProfileItem() {
 function SupportKofiItem() {
   return (
     <CustomLink
-      href="https://ko-fi.com/supertiger"
+      href="https://cannacured.com"
       target="_blank"
       style={{ "text-decoration": "none" }}
     >
       <div class={styles.itemContainer}>
         <Icon name="favorite" />
-        <div style={{ flex: 1 }}>Support me on Ko-Fi</div>
+        <div style={{ flex: 1 }}>Cannacured</div>
         <Icon name="open_in_new" />
       </div>
     </CustomLink>
