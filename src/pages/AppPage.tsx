@@ -153,18 +153,18 @@ export default function AppPage() {
     }
   }
 
-  function handleFirstTime() {
-    const isFirstTime = getStorageString(StorageKeys.FIRST_TIME, false);
-    if (!isFirstTime) return;
-    removeStorage(StorageKeys.FIRST_TIME);
-    createPortal?.((close) => <WelcomeModal close={close} />);
-  }
+  // function handleFirstTime() {
+  //   const isFirstTime = getStorageString(StorageKeys.FIRST_TIME, false);
+  //   if (!isFirstTime) return;
+  //   removeStorage(StorageKeys.FIRST_TIME);
+  //   createPortal?.((close) => <WelcomeModal close={close} />);
+  // }
 
-  createEffect(
-    on(account.isAuthenticated, () => {
-      handleFirstTime();
-    })
-  );
+  // createEffect(
+  //   on(account.isAuthenticated, () => {
+  //     handleFirstTime();
+  //   })
+  // );
 
   createEffect(
     on(account.authenticationError, (err) => {
