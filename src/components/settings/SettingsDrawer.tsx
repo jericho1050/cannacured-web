@@ -1,19 +1,16 @@
 import Icon from "@/components/ui/icon/Icon";
-import { A, useMatch, useNavigate, useParams } from "solid-navigator";
+import { A, useMatch } from "solid-navigator";
 import { For, JSXElement, Match, Show, Switch } from "solid-js";
 import useStore from "@/chat-api/store/useStore";
-import RouterEndpoints from "@/common/RouterEndpoints";
 import settings from "@/common/Settings";
 import ItemContainer from "@/components/ui/LegacyItem";
 import { css, styled } from "solid-styled-components";
 import Text from "@/components/ui/Text";
-import { FlexColumn, FlexRow } from "../ui/Flexbox";
+import { FlexColumn } from "../ui/Flexbox";
 import env from "@/common/env";
-import { Dynamic } from "solid-js/web";
 import { useCustomPortal } from "../ui/custom-portal/CustomPortal";
 import { ChangelogModal } from "../ChangelogModal";
 import { clearCache } from "@/common/localCache";
-import socketClient from "@/chat-api/socketClient";
 import { DrawerHeader } from "../drawer-header/DrawerHeader";
 import { useTransContext } from "@mbarzda/solid-i18next";
 import { t } from "i18next";
@@ -69,7 +66,6 @@ const FooterContainer = styled(FlexColumn)`
 
 function Footer() {
   const [t] = useTransContext();
-  const navigate = useNavigate();
   const { createPortal } = useCustomPortal();
 
   const onChangelogClick = () =>
@@ -83,12 +79,12 @@ function Footer() {
   return (
     <FooterContainer gap={2}>
       <SupportBlock />
-      <FooterItem
+      {/* <FooterItem
         href="https://github.com/Nerimity/Nerimity-Web"
         external
         icon="code"
         label={t("settings.drawer.viewSource")}
-      />
+      /> */}
       <FooterItem
         icon="description"
         label={t("settings.drawer.changelog")}

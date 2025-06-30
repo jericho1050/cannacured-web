@@ -34,13 +34,13 @@ const settings: Setting[] = [
     element: lazy(() => import("@/components/settings/ProfileSettings")),
     hide: true,
   },
-  {
-    path: "badges",
-    routePath: "/badges",
-    name: "settings.drawer.badges",
-    icon: "local_police",
-    element: lazy(() => import("@/components/settings/BadgeSettings")),
-  },
+  // {
+  //   path: "badges",
+  //   routePath: "/badges",
+  //   name: "settings.drawer.badges",
+  //   icon: "local_police",
+  //   element: lazy(() => import("@/components/settings/BadgeSettings")),
+  // },
   {
     path: "interface",
     routePath: "/interface",
@@ -63,13 +63,13 @@ const settings: Setting[] = [
     icon: "notifications",
     element: lazy(() => import("@/components/settings/NotificationsSettings")),
   },
-  {
-    path: "call-settings",
-    routePath: "/call-settings",
-    name: "settings.drawer.call-settings",
-    icon: "call",
-    element: lazy(() => import("@/components/settings/CallSettings")),
-  },
+  // {
+  //   path: "call-settings",
+  //   routePath: "/call-settings",
+  //   name: "settings.drawer.call-settings",
+  //   icon: "call",
+  //   element: lazy(() => import("@/components/settings/CallSettings")),
+  // },
   {
     path: "connections",
     routePath: "/connections",
@@ -105,71 +105,71 @@ const settings: Setting[] = [
     icon: "flag",
     element: lazy(() => import("@/components/settings/LanguageSettings")),
   },
-  {
-    path: "developer",
-    routePath: "/developer",
-    name: "settings.drawer.developer",
-    icon: "code",
-    element: lazy(
-      () => import("@/components/settings/developer/DeveloperSettings")
-    ),
-  },
-  {
-    path: "developer/applications",
-    routePath: "/developer/applications",
-    name: "settings.drawer.developer",
-    icon: "code",
-    hide: true,
-    element: lazy(
-      () =>
-        import("@/components/settings/developer/DeveloperApplicationsSettings")
-    ),
-  },
-  {
-    path: "developer/applications",
-    routePath: "/developer/applications/:id",
-    name: "settings.drawer.developer",
-    hideHeader: true,
-    icon: "code",
-    hide: true,
-    element: lazy(
-      () =>
-        import("@/components/settings/developer/DeveloperApplicationSettings")
-    ),
-  },
-  {
-    path: "developer/applications",
-    routePath: "/developer/applications/:id/bot/create-link",
-    name: "settings.drawer.developer",
-    hideHeader: true,
-    icon: "code",
-    hide: true,
-    element: lazy(
-      () =>
-        import(
-          "@/components/settings/developer/DeveloperApplicationBotCreateLinkSettings"
-        )
-    ),
-  },
-  {
-    path: "developer/applications",
-    routePath: "/developer/applications/:id/bot/profile",
-    name: "settings.drawer.developer",
-    hideHeader: true,
-    icon: "code",
-    hide: true,
-    element: DeveloperApplicationBotSettings,
-  },
+  // {
+  //   path: "developer",
+  //   routePath: "/developer",
+  //   name: "settings.drawer.developer",
+  //   icon: "code",
+  //   element: lazy(
+  //     () => import("@/components/settings/developer/DeveloperSettings")
+  //   ),
+  // },
+  // {
+  //   path: "developer/applications",
+  //   routePath: "/developer/applications",
+  //   name: "settings.drawer.developer",
+  //   icon: "code",
+  //   hide: true,
+  //   element: lazy(
+  //     () =>
+  //       import("@/components/settings/developer/DeveloperApplicationsSettings")
+  //   ),
+  // },
+  // {
+  //   path: "developer/applications",
+  //   routePath: "/developer/applications/:id",
+  //   name: "settings.drawer.developer",
+  //   hideHeader: true,
+  //   icon: "code",
+  //   hide: true,
+  //   element: lazy(
+  //     () =>
+  //       import("@/components/settings/developer/DeveloperApplicationSettings")
+  //   ),
+  // },
+  // {
+  //   path: "developer/applications",
+  //   routePath: "/developer/applications/:id/bot/create-link",
+  //   name: "settings.drawer.developer",
+  //   hideHeader: true,
+  //   icon: "code",
+  //   hide: true,
+  //   element: lazy(
+  //     () =>
+  //       import(
+  //         "@/components/settings/developer/DeveloperApplicationBotCreateLinkSettings"
+  //       )
+  //   ),
+  // },
+  // {
+  //   path: "developer/applications",
+  //   routePath: "/developer/applications/:id/bot/profile",
+  //   name: "settings.drawer.developer",
+  //   hideHeader: true,
+  //   icon: "code",
+  //   hide: true,
+  //   element: DeveloperApplicationBotSettings,
+  // },
 
-  {
-    path: "developer/applications",
-    routePath: "/developer/applications/:id/bot",
-    name: "settings.drawer.developer",
-    hideHeader: true,
-    icon: "code",
-    hide: true,
-    element: DeveloperApplicationBotSettings,
-  },
+  // {
+  //   path: "developer/applications",
+  //   routePath: "/developer/applications/:id/bot",
+  //   name: "settings.drawer.developer",
+  //   hideHeader: true,
+  //   icon: "code",
+  //   hide: true,
+  //   element: DeveloperApplicationBotSettings,
+  // },
   {
     path: "experiments",
     routePath: "/experiments",
