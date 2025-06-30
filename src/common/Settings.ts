@@ -91,13 +91,13 @@ const settings: Setting[] = [
     icon: "launch",
     element: lazy(() => import("@/components/settings/WindowSettings")),
   },
-  {
-    path: "activity-status",
-    routePath: "/activity-status",
-    name: "settings.drawer.activity-status",
-    icon: "games",
-    element: lazy(() => import("@/components/settings/ActivityStatus")),
-  },
+  // {
+  //   path: "activity-status",
+  //   routePath: "/activity-status",
+  //   name: "settings.drawer.activity-status",
+  //   icon: "games",
+  //   element: lazy(() => import("@/components/settings/ActivityStatus")),
+  // },
   {
     path: "language",
     routePath: "/language",
