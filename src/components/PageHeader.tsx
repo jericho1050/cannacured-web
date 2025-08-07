@@ -11,6 +11,7 @@ import { useTransContext } from "@mbarzda/solid-i18next";
 import { logout } from "@/common/logout";
 import { Skeleton } from "./ui/skeleton/Skeleton";
 import Avatar from "./ui/Avatar";
+import { Portal } from "solid-js/web";
 
 const HeaderContainer = styled("header")`
   display: flex;
@@ -27,6 +28,55 @@ const HeaderContainer = styled("header")`
     margin-left: 10px;
     margin-right: 10px;
     width: calc(100% - 20px);
+  }
+`;
+
+const DesktopNav = styled("div")`
+  display: none;
+  @media (min-width: 821px) {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    margin-right: 4px;
+  }
+`;
+
+const MobileNavContainer = styled("div")`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const MobileNavContent = styled("div")`
+  background-color: var(--pane-color);
+  width: 80%;
+  max-width: 300px;
+  height: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+const HamburgerButton = styled("button")`
+  display: none;
+  @media (max-width: 820px) {
+    display: block;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: auto;
+    margin-right: 20px;
   }
 `;
 
@@ -75,6 +125,10 @@ const NavigationContainer = styled("nav")`
     background: #4c93ff;
     background: linear-gradient(to right, #4c93ff 0%, #6a5dff 100%);
   }
+
+  @media (max-width: 820px) {
+    display: none;
+  }
 `;
 
 const LinkContainer = styled("div")<{ primary: boolean }>`
@@ -114,6 +168,7 @@ const linkIconStyle = css`
 
 export default function PageHeader(props: { hideAccountInfo?: boolean }) {
   const [user, setUser] = createSignal<null | false | RawUser>(null);
+  const [isMobileMenuOpen, setMobileMenuOpen] = createSignal(false);
 
   onMount(async () => {
     if (props.hideAccountInfo) {
@@ -145,6 +200,10 @@ export default function PageHeader(props: { hideAccountInfo?: boolean }) {
     setUser(details.user);
   };
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!isMobileMenuOpen());
+  };
+
   return (
     <HeaderContainer class="header-container">
       <A href="/" class={titleContainerStyle}>
@@ -152,14 +211,25 @@ export default function PageHeader(props: { hideAccountInfo?: boolean }) {
         {/* <Title>Nerimity</Title> */}
       </A>
       <Show when={!props.hideAccountInfo}>
-        <Switch fallback={<LogInLogOutSkeleton />}>
-          <Match when={user() === false}>
-            <LoggedOutLinks />
-          </Match>
-          <Match when={user()}>
-            <LoggedInLinks user={user() as RawUser} />
-          </Match>
-        </Switch>
+        <DesktopNav>
+          <Switch fallback={<LogInLogOutSkeleton />}>
+            <Match when={user() === false}>
+              <LoggedOutLinks />
+            </Match>
+            <Match when={user()}>
+              <LoggedInLinks user={user() as RawUser} />
+            </Match>
+          </Switch>
+        </DesktopNav>
+        <HamburgerButton onClick={toggleMobileMenu}>
+          <Icon name="menu" />
+        </HamburgerButton>
+        <Show when={isMobileMenuOpen()}>
+          <MobileNav
+            user={user()}
+            onClose={() => setMobileMenuOpen(false)}
+          />
+        </Show>
       </Show>
     </HeaderContainer>
   );
@@ -190,7 +260,7 @@ function LoggedInLinks(props: { user: RawUser }) {
   };
 
   return (
-    <NavigationContainer class="navigation-container">
+    <>
       <HeaderLink
         href="#"
         color="var(--alert-color)"
@@ -212,14 +282,14 @@ function LoggedInLinks(props: { user: RawUser }) {
           margin-right: 6px;
         `}
       />
-    </NavigationContainer>
+    </>
   );
 }
 
 function LoggedOutLinks() {
   const [t] = useTransContext();
   return (
-    <NavigationContainer class="navigation-container">
+    <>
       <HeaderLink href="/login" label={t("header.loginButton")} icon="login" />
       <HeaderLink
         href="/register"
@@ -227,7 +297,29 @@ function LoggedOutLinks() {
         class="register-button"
         icon="add"
       />
-    </NavigationContainer>
+    </>
+  );
+}
+
+function MobileNav(props: {
+  user: RawUser | null | false;
+  onClose: () => void;
+}) {
+  return (
+    <Portal>
+      <MobileNavContainer onClick={props.onClose}>
+        <MobileNavContent onClick={(e) => e.stopPropagation()}>
+          <Switch>
+            <Match when={props.user === false}>
+              <LoggedOutLinks />
+            </Match>
+            <Match when={props.user}>
+              <LoggedInLinks user={props.user as RawUser} />
+            </Match>
+          </Switch>
+        </MobileNavContent>
+      </MobileNavContainer>
+    </Portal>
   );
 }
 

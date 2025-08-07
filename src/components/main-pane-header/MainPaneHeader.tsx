@@ -368,18 +368,37 @@ function VideoStream(props: { mediaStream: MediaStream; mute?: boolean }) {
   let videoEl: HTMLVideoElement | undefined;
 
   const [muted, setMuted] = createSignal(false);
-
   const mediaStream = createMemo(() => props.mediaStream);
 
+  // DEBUG LOGS - Add these
+  console.log("VideoStream props:", { 
+    mute: props.mute, 
+    hasMediaStream: !!props.mediaStream,
+    mediaStreamId: props.mediaStream?.id 
+  });
+
   createEffect(() => {
+    console.log("VideoStream createEffect:", { 
+      hasVideoEl: !!videoEl, 
+      hasMediaStream: !!mediaStream() 
+    });
     if (!videoEl) return;
     videoEl.srcObject = mediaStream();
+  });
+
+  createEffect(() => {
+    console.log("VideoStream muted state:", { 
+      muted: muted(), 
+      propsMute: props.mute,
+      finalMuted: props.mute || muted(),
+      showVolumeControls: !props.mute 
+    });
   });
 
   return (
     <div class={styles.videoContainer}>
       <video ref={videoEl} autoplay muted={props.mute || muted()} />
-      <div class={styles.videoOverlay}>
+      <div class={styles.videoOverlay} style={{ transform: "translateY(0)" }}> {/* TEMP FIX FOR TESTING */}
         <Show when={!props.mute}>
           <div class={styles.volumeSlider}>
             <Button
@@ -393,12 +412,14 @@ function VideoStream(props: { mediaStream: MediaStream; mute?: boolean }) {
             <input
               type="range"
               min={0}
-              value={muted() ? 0 : videoEl!.volume}
+              value={muted() ? 0 : videoEl?.volume || 0}
               max={1}
               step={0.01}
               onInput={(e) => {
-                videoEl!.volume = parseFloat(e.target.value);
-                setMuted(false);
+                if (videoEl) {
+                  videoEl.volume = parseFloat(e.target.value);
+                  setMuted(false);
+                }
               }}
             />
           </div>
@@ -415,7 +436,6 @@ function VideoStream(props: { mediaStream: MediaStream; mute?: boolean }) {
     </div>
   );
 }
-
 function VoiceParticipants(props: {
   channelId: string;
   selectedUserId?: string | null;

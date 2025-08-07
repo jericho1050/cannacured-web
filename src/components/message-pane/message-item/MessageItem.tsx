@@ -763,7 +763,7 @@ const LocalCdnEmbeds = (props: {
   maxHeight?: number;
 }) => {
   const isImageCompressed = () => {
-    return props.attachment.width;
+    return props.attachment.width && props.attachment.mime?.startsWith("image/");
   };
 
   const isVideo = () => {
@@ -811,6 +811,7 @@ const LocalVideoEmbed = (props: { attachment: RawAttachment }) => {
         name: props.attachment.path?.split("/").reverse()[0]!,
         size: props.attachment.filesize!,
         url: env.NERIMITY_CDN + props.attachment.path!,
+        thumbnailLink: env.NERIMITY_CDN + props.attachment.thumbnailPath!,
         expireAt: props.attachment.expireAt,
         provider: "local",
       }}
@@ -973,6 +974,7 @@ const VideoEmbed = (props: {
     name: string;
     size: number;
     thumbnailLink?: string;
+    thumbnailUrl?: string;
     expireAt?: number;
     provider: AttachmentProviders;
   };
@@ -984,7 +986,7 @@ const VideoEmbed = (props: {
     if (reactNativeAPI()?.isReactNative) {
       reactNativeAPI()?.playVideo(props.file?.url!);
       return;
-    }
+  }
 
     if (props.file?.provider === "google_drive") {
       if (
@@ -1057,7 +1059,7 @@ const VideoEmbed = (props: {
         </Show>
         <Show when={props.file && !props.error}>
           <Show when={!playVideo()}>
-            <Show when={props.file?.thumbnailLink}>
+            <Show when={props.file?.thumbnailLink || props.file?.thumbnailUrl}>
               <img
                 crossorigin="anonymous"
                 style={{
@@ -1065,7 +1067,7 @@ const VideoEmbed = (props: {
                   height: "100%",
                   "object-fit": "contain",
                 }}
-                src={props.file?.thumbnailLink}
+                src={props.file?.thumbnailLink || props.file?.thumbnailUrl}
                 alt=""
               />
             </Show>
@@ -1081,6 +1083,7 @@ const VideoEmbed = (props: {
           </Show>
           <Show when={playVideo()}>
             <video
+              poster={props.file?.thumbnailUrl}
               crossorigin="anonymous"
               style={{ width: "100%", height: "100%", "object-fit": "contain" }}
               autoplay
@@ -1541,7 +1544,7 @@ const replaceImageUrl = (val: string, hasFocus: boolean) => {
   return val.replaceAll(regex, (r) => {
     let url = regex2.exec(r)?.[1];
     if (!url) return r;
-    if (url.startsWith('"') || url.startsWith("'")) {
+    if (url.startsWith("\"") || url.startsWith("'")) {
       url = url.slice(1, -1);
     }
     return `url("${
@@ -1647,7 +1650,7 @@ function HTMLEmbedItem(props: { items: HtmlEmbedItem[] | string[] }) {
       .replaceAll("&amp;", "&")
       .replaceAll("&lt;", "<")
       .replaceAll("&gt;", ">")
-      .replaceAll("&quot;", '"')
+      .replaceAll("&quot;", "\"")
       .replaceAll("&#039;", "'");
   };
   return (

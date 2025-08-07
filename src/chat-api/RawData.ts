@@ -123,6 +123,7 @@ export interface RawAttachment {
   mime?: string;
   messageId?: string;
   path?: string;
+  thumbnailPath?: string;
   width?: number;
   height?: number;
   createdAt?: number;
