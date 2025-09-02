@@ -56,6 +56,7 @@ interface PostMessageOpts {
   mentionReplies?: boolean;
   silent?: boolean;
   nerimityCdnFileId?: string;
+  nerimityCdnFileIds?: string[];
   googleDriveAttachment?: {
     id: string;
     mime: string;
@@ -71,20 +72,24 @@ export const postMessage = async (opts: PostMessageOpts) => {
 
     ...(opts.replyToMessageIds?.length
       ? {
-        replyToMessageIds: opts.replyToMessageIds,
-        mentionReplies: opts.mentionReplies,
-      }
+          replyToMessageIds: opts.replyToMessageIds,
+          mentionReplies: opts.mentionReplies,
+        }
       : {}),
 
-    ...(opts.nerimityCdnFileId ? { nerimityCdnFileId: opts.nerimityCdnFileId } : {}),
+    ...(opts.nerimityCdnFileId
+      ? { nerimityCdnFileId: opts.nerimityCdnFileId }
+      : {}),
+
+    ...(opts.nerimityCdnFileIds?.length
+      ? { nerimityCdnFileIds: opts.nerimityCdnFileIds }
+      : {}),
 
     ...(opts.googleDriveAttachment
       ? { googleDriveAttachment: opts.googleDriveAttachment }
       : {}),
     ...(opts.socketId ? { socketId: opts.socketId } : {}),
   };
-
-
 
   const data = await request<RawMessage>({
     method: "POST",
@@ -99,7 +104,6 @@ interface UpdateMessageOpts {
   channelId: string;
   messageId: string;
 }
-
 
 interface MarkMessageUnreadOpts {
   channelId: string;

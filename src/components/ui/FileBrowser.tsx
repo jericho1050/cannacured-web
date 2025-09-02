@@ -58,7 +58,7 @@ export default function FileBrowser(props: Props) {
 }
 
 async function filesToBase64(files: FileList) {
-  const base64Files = [];
+  const base64Files = [] as string[];
   for (let index = 0; index < files.length; index++) {
     const file = files[index];
     const base64 = await getBase64(file);

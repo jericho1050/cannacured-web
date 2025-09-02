@@ -422,9 +422,11 @@ export const MessageLogArea = (props: {
   });
 
   const onPaste = async (event: ClipboardEvent) => {
-    const file = event.clipboardData?.files[0];
-    if (!file) return;
-    channelProperties.setAttachment(params.channelId, file);
+    const files = Array.from(event.clipboardData?.files || []);
+    if (!files.length) return;
+    const first = files[0];
+    // Preserve existing behavior: single paste sets single attachment
+    channelProperties.setAttachment(params.channelId, first);
   };
 
   // key binds

@@ -111,7 +111,6 @@ const MessageListModalContainer = styled(FlexColumn)`
   overflow: auto;
 `;
 
-const MessagesModalChannelInfoContainer = styled(FlexRow)``;
 const MessageModalRootStyle = css`
   width: 600px;
   height: 60vh;
@@ -443,6 +442,7 @@ const MessageInputArea = (props: {
           <FileBrowser
             ref={setFileBrowserRef}
             accept="images"
+            multiple
             onChange={onAttachmentChange}
           />
           <Show when={!attachment()}>

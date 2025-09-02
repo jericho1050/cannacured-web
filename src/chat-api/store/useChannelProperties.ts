@@ -10,8 +10,15 @@ export type ChannelProperties = {
   replyToMessages: RawMessage[];
   mentionReplies?: boolean;
 
+  // Deprecated: use `attachments` for multiple files
   attachment?: {
     file: File;
+    uploadTo: "google_drive" | "nerimity_cdn";
+  };
+
+  // New: multiple attachments support
+  attachments?: {
+    files: File[];
     uploadTo: "google_drive" | "nerimity_cdn";
   };
 
@@ -112,6 +119,7 @@ const setAttachment = (
   initIfMissing(channelId);
   if (!file && !uploadTo) {
     setChannelProperties(channelId, "attachment", undefined);
+    setChannelProperties(channelId, "attachments", undefined);
     return;
   }
 
@@ -122,6 +130,39 @@ const setAttachment = (
 
   setChannelProperties(channelId, "attachment", {
     ...(file ? { file } : undefined),
+    uploadTo: _uploadTo,
+  });
+  // Keep multiple attachments state in sync when setting single
+  if (file) {
+    setChannelProperties(channelId, "attachments", {
+      files: [file],
+      uploadTo: _uploadTo,
+    });
+  }
+};
+
+const setAttachments = (
+  channelId: string,
+  files?: File[],
+  uploadTo?: "google_drive" | "nerimity_cdn"
+) => {
+  initIfMissing(channelId);
+  if (!files || files.length === 0) {
+    setChannelProperties(channelId, "attachments", undefined);
+    setChannelProperties(channelId, "attachment", undefined);
+    return;
+  }
+
+  const anyOver50MB = files.some((f) => f.size > 50 * 1024 * 1024);
+  const _uploadTo = uploadTo || (anyOver50MB ? "google_drive" : "nerimity_cdn");
+
+  setChannelProperties(channelId, "attachments", {
+    files,
+    uploadTo: _uploadTo,
+  });
+  // Mirror the first file into the legacy single attachment for backwards compatibility
+  setChannelProperties(channelId, "attachment", {
+    file: files[0],
     uploadTo: _uploadTo,
   });
 };
@@ -168,6 +209,7 @@ export default function useChannelProperties() {
     get,
     setEditMessage,
     setAttachment,
+    setAttachments,
     setScrollTop,
     updateStale,
     setScrolledBottom,
