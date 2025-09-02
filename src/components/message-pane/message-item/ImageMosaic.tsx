@@ -4,6 +4,7 @@ import env from "@/common/env";
 import { useWindowProperties } from "@/common/useWindowProperties";
 import { useCustomPortal } from "@/components/ui/custom-portal/CustomPortal";
 import { ImagePreviewModal } from "@/components/ui/ImagePreviewModal";
+import { ImageGalleryModal, type GalleryImage } from "@/components/ui/ImageGalleryModal";
 import type { RawAttachment } from "@/chat-api/RawData";
 import {
   ImageMosaicCalculator,
@@ -27,7 +28,6 @@ const ImageMosaic: Component<ImageMosaicProps> = (props) => {
   const computeMaxWidth = () => {
     const base = (paneWidth() || 600) + widthOffset;
     return Math.min(Math.max(base, 240), 600);
-    // clamp between 240 and 600
   };
   const computeMaxHeight = () => (winWidth() <= 600 ? 260 : 300);
 
@@ -37,6 +37,14 @@ const ImageMosaic: Component<ImageMosaicProps> = (props) => {
     if (isGifPath(att.path) && !hasFocus()) url += "?type=webp";
     return url;
   };
+
+  const galleryImages = (): GalleryImage[] =>
+    props.attachments.map((att) => ({
+      url: toUrl(att),
+      origUrl: `${env.NERIMITY_CDN}${att.path}`,
+      width: att.width,
+      height: att.height,
+    }));
 
   onMount(async () => {
     const items: ImageLayoutItem[] = props.attachments.map((att) => {
@@ -62,8 +70,15 @@ const ImageMosaic: Component<ImageMosaicProps> = (props) => {
     });
   };
 
-  const onClick = (url: string) => {
+  const onClick = (idx: number, url: string) => {
     if (!url) return;
+    const hasMultiple = props.attachments.length > 1;
+    if (hasMultiple) {
+      createPortal((close) => (
+        <ImageGalleryModal close={close} images={galleryImages()} initialIndex={idx} />
+      ));
+      return;
+    }
     createPortal((close) => <ImagePreviewModal close={close} url={url} />);
   };
 
@@ -87,7 +102,7 @@ const ImageMosaic: Component<ImageMosaicProps> = (props) => {
                   width: `${img.width}px`,
                   height: `${img.height}px`,
                 }}
-                onClick={() => onClick(img.url)}
+                onClick={() => onClick(i(), img.url)}
               >
                 <img
                   src={img.url}
