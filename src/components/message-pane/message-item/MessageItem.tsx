@@ -44,6 +44,7 @@ import {
   onMount,
   Show,
   Switch,
+  ParentComponent,
 } from "solid-js";
 import { Markup } from "@/components/Markup";
 import { useCustomPortal } from "@/components/ui/custom-portal/CustomPortal";
@@ -104,6 +105,7 @@ import {
 } from "@/common/regex";
 import { RawYoutubeEmbed } from "./RawYoutubeEmbed";
 import { fetchTranslation, TranslateRes } from "@/common/GoogleTranslate";
+import ImageMosaic from "./ImageMosaic";
 
 const DeleteMessageModal = lazy(
   () => import("../message-delete-modal/MessageDeleteModal")
@@ -715,15 +717,30 @@ export function Embeds(props: {
   const youtubeEmbed = () =>
     props.message.embed?.origUrl?.match(youtubeLinkRegex);
 
+  const localAttachments = () =>
+    (props.message.attachments || []).filter((a) => a.provider === "local");
+  const isImageAtt = (a: RawAttachment) => !!a.width || a.mime?.startsWith("image/") || false;
+  const localImageAtts = () => localAttachments().filter(isImageAtt);
+  const localNonImageAtts = () => localAttachments().filter((a) => !isImageAtt(a));
+
   return (
     <div class={styles.embeds}>
-      <Show when={props.message.attachments?.[0]?.provider === "local"}>
+      <Show when={localImageAtts().length >= 2}>
+        <ImageMosaic attachments={localImageAtts()} />
+      </Show>
+
+      <Show when={localImageAtts().length < 2 && localAttachments()[0]}>
         <LocalCdnEmbeds
-          attachment={props.message.attachments?.[0]!}
+          attachment={localAttachments()[0]!}
           maxWidth={props.maxWidth}
           maxHeight={props.maxHeight}
         />
       </Show>
+
+      <For each={localNonImageAtts()}>
+        {(att) => <LocalCdnEmbeds attachment={att} />}
+      </For>
+
       <Switch>
         <Match when={props.message.htmlEmbed}>
           <HTMLEmbed message={props.message} />
@@ -735,9 +752,9 @@ export function Embeds(props: {
         <Match when={youtubeEmbed()}>
           {(youtubeEmbed) => (
             <YoutubeEmbed
-              code={youtubeEmbed()[3]}
+              code={youtubeEmbed()?.[3] || ""}
               embed={props.message.embed!}
-              shorts={youtubeEmbed()[1].endsWith("shorts")}
+              shorts={!!(youtubeEmbed()?.[1]?.endsWith("shorts"))}
             />
           )}
         </Match>
@@ -747,7 +764,12 @@ export function Embeds(props: {
           <GoogleDriveEmbeds attachment={props.message.attachments?.[0]!} />
         </Match>
         <Match when={props.message.embed}>
-          <OGEmbed message={props.message} />
+          <OGEmbed
+            message={{
+              content: props.message.content,
+              embed: props.message.embed!,
+            }}
+          />
         </Match>
       </Switch>
       <Show when={props.message.buttons}>
@@ -889,7 +911,7 @@ export const YoutubeEmbed = (props: {
 };
 
 const TwitterEmbed = (props: { path: string }) => {
-  let ref: HTMLDivElement | undefined;
+  let ref: HTMLQuoteElement | undefined;
   let containerRef: HTMLDivElement | undefined;
   const existingScript = document.getElementById("twitter-wjs");
   if (!existingScript) {
@@ -901,7 +923,7 @@ const TwitterEmbed = (props: { path: string }) => {
     document.body.appendChild(scriptEl);
   }
   onMount(() => {
-    window.twttr?.widgets.load(ref);
+    (window as any).twttr?.widgets.load(ref);
   });
   onCleanup(() => {
     containerRef?.remove();
@@ -1434,7 +1456,7 @@ export function OGEmbed(props: {
   );
 }
 
-const NormalEmbed = (props: { message: RawMessage }) => {
+const NormalEmbed = (props: { message: { content?: string; embed: RawEmbed } }) => {
   const { hasFocus } = useWindowProperties();
   const { createPortal } = useCustomPortal();
 

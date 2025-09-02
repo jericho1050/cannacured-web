@@ -151,7 +151,9 @@ const sendAndStoreMessage = async (channelId: string, content?: string) => {
   const channels = useChannels();
   const channelProperties = useChannelProperties();
   const properties = channelProperties.get(channelId);
-  const file = properties?.attachment?.file;
+  const singleFile = properties?.attachment?.file;
+  const multipleFiles = properties?.attachments?.files;
+  const file = singleFile || multipleFiles?.[0];
   const tempMessageId = `${Date.now()}-${Math.random()}`;
   const channel = channels.get(channelId);
 
@@ -231,9 +233,11 @@ const sendAndStoreMessage = async (channelId: string, content?: string) => {
   const isMoreThan12MB = file && file.size > 12 * 1024 * 1024;
 
   const shouldUploadToGoogleDrive =
-    properties?.attachment?.uploadTo === "google_drive";
+    properties?.attachment?.uploadTo === "google_drive" ||
+    properties?.attachments?.uploadTo === "google_drive";
   const shouldUploadToNerimityCdn =
-    properties?.attachment?.uploadTo === "nerimity_cdn";
+    properties?.attachment?.uploadTo === "nerimity_cdn" ||
+    properties?.attachments?.uploadTo === "nerimity_cdn";
 
   let googleDriveFileId: string | undefined;
   if (file && shouldUploadToGoogleDrive) {
@@ -263,7 +267,29 @@ const sendAndStoreMessage = async (channelId: string, content?: string) => {
   channelProperties.removeReplies(channelId);
 
   let nerimityCdnFileId: string | undefined;
-  if (shouldUploadToNerimityCdn && file) {
+  let nerimityCdnFileIds: string[] | undefined;
+
+  // Multi-file upload (sequential) for CDN
+  if (shouldUploadToNerimityCdn && multipleFiles?.length) {
+    nerimityCdnFileIds = [];
+    for (const f of multipleFiles) {
+      const data = await uploadAttachment(channelId, {
+        file: f,
+        onUploadProgress,
+      }).catch((err) => {
+        channelProperties.updateContent(channelId, content || "");
+        channelProperties.setAttachments(channelId, multipleFiles, "nerimity_cdn");
+        pushFailedMessage(channelId, err.message || "Failed to upload File. ");
+        const index = messages[channelId]?.findIndex(
+          (m) => m.tempId === tempMessageId
+        );
+        setMessages(channelId, index!, "sentStatus", MessageSentStatus.FAILED);
+        return undefined;
+      });
+      if (!data) return;
+      nerimityCdnFileIds.push(data.fileId);
+    }
+  } else if (shouldUploadToNerimityCdn && file) {
     const data = await uploadAttachment(channelId, {
       file,
       onUploadProgress,
@@ -291,6 +317,7 @@ const sendAndStoreMessage = async (channelId: string, content?: string) => {
     replyToMessageIds,
     mentionReplies,
     nerimityCdnFileId,
+    nerimityCdnFileIds,
     googleDriveAttachment: googleDriveFileId
       ? { id: googleDriveFileId, mime: file?.type! }
       : undefined,
@@ -312,6 +339,13 @@ const sendAndStoreMessage = async (channelId: string, content?: string) => {
         channelId,
         file,
         properties?.attachment?.uploadTo
+      );
+    }
+    if (properties?.attachments) {
+      channelProperties.setAttachments(
+        channelId,
+        properties.attachments.files,
+        properties.attachments.uploadTo
       );
     }
     pushFailedMessage(channelId, err.message || "Failed to send message. ");

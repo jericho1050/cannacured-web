@@ -582,8 +582,13 @@ function CustomTextArea(props: CustomTextAreaProps) {
   const pickedFile = () => channelProperties.get(params.channelId)?.attachment;
 
   const onFilePicked = async (test: FileList) => {
-    const file = test.item(0) || undefined;
-    channelProperties.setAttachment(params.channelId, file);
+    const files: File[] = Array.from(test);
+    if (!files.length) return;
+    if (files.length === 1) {
+      channelProperties.setAttachment(params.channelId, files[0]);
+    } else {
+      channelProperties.setAttachments(params.channelId, files);
+    }
     textAreaRef?.focus();
   };
 
@@ -622,6 +627,7 @@ function CustomTextArea(props: CustomTextAreaProps) {
         <FileBrowser
           ref={setAttachmentFileBrowserRef}
           accept="any"
+          multiple
           onChange={onFilePicked}
         />
         <Button
@@ -1164,10 +1170,12 @@ function FloatingAttachment(props: {}) {
   const { createPortal } = useCustomPortal();
   const { channelProperties } = useStore();
   const [dataUrl, setDataUrl] = createSignal<string | undefined>(undefined);
+  const [multiDataUrls, setMultiDataUrls] = createSignal<string[]>([]);
   const { paneWidth } = useWindowProperties();
 
   const getAttachmentFile = () =>
     channelProperties.get(params.channelId)?.attachment;
+  const getAttachments = () => channelProperties.get(params.channelId)?.attachments;
   const isImage = () => getAttachmentFile()?.file.type.startsWith("image/");
 
   const isMoreThan12MB = () =>
@@ -1176,10 +1184,29 @@ function FloatingAttachment(props: {}) {
     getAttachmentFile()!.file.size > 50 * 1024 * 1024;
 
   createEffect(async () => {
-    const file = getAttachmentFile()?.file;
-    if (!file) return;
+    const single = getAttachmentFile()?.file;
+    const multiple = getAttachments()?.files;
+
+    if (multiple?.length) {
+      const previews: string[] = [];
+      const max = Math.min(multiple.length, 4);
+      for (let i = 0; i < max; i++) {
+        const f = multiple[i];
+        if (f.type.startsWith("image/")) {
+          previews.push(await fileToDataUrl(f));
+        } else {
+          previews.push("");
+        }
+      }
+      setMultiDataUrls(previews);
+      setDataUrl(undefined);
+      return;
+    }
+
+    setMultiDataUrls([]);
+    if (!single) return;
     if (!isImage()) return;
-    const getDataUrl = await fileToDataUrl(file);
+    const getDataUrl = await fileToDataUrl(single);
     setDataUrl(getDataUrl);
   });
 
@@ -1187,68 +1214,118 @@ function FloatingAttachment(props: {}) {
     channelProperties.setAttachment(params.channelId, file);
   };
   const showImageEditor = () => {
+    if (!dataUrl()) return;
     createPortal((close) => (
       <PhotoEditor done={editDone} src={dataUrl()!} close={close} />
     ));
   };
 
   const uploadToOptions = () => {
+    const single = getAttachmentFile()?.file;
+    const size = single?.size || 0;
+    const is50 = size > 50 * 1024 * 1024;
     return [
-      ...(isMoreThan50MB()
-        ? []
-        : [{ id: "nerimity_cdn", label: "Nerimity CDN" }]),
+      ...(is50 ? [] : [{ id: "nerimity_cdn", label: "Nerimity CDN" }]),
       { id: "google_drive", label: "Google Drive" },
     ] satisfies DropDownItem[];
   };
 
   const isMobileWidth = () => (paneWidth() || 0) <= 400;
 
+  const files = () => getAttachments()?.files || (getAttachmentFile()?.file ? [getAttachmentFile()!.file] : []);
+  const showMulti = () => (getAttachments()?.files?.length || 0) > 1;
+  const total = () => files().length;
+
   return (
     <Floating
       class={cn(styles.floatingAttachment, !!isMobileWidth() && styles.mobile)}
     >
       <div class={styles.attachmentContent}>
-        <Show when={isImage() && !isMoreThan12MB()}>
-          <div class={styles.attachmentImageContainer}>
-            <img
-              onClick={showImageEditor}
-              class={styles.attachmentImage}
-              src={dataUrl()}
-              alt=""
-            />
-            <Button
-              onClick={showImageEditor}
-              class={styles.attachmentEditImageButton}
-              margin={0}
-              padding={6}
-              iconSize={18}
-              styles={{ "margin-left": "auto" }}
-              iconName="brush"
+        <Show when={showMulti()}>
+          <div style={{ display: "grid", gap: "4px", "grid-template-columns": "repeat(2, 1fr)", width: "160px" }}>
+            <For each={multiDataUrls()}>
+              {(url, i) => (
+                <div style={{ position: "relative", width: "100%", "aspect-ratio": "1/1", overflow: "hidden", border: "1px solid rgba(255,255,255,0.24)", "border-radius": "4px", "background":"rgba(0,0,0,0.6)" }}>
+                  <Show when={url} fallback={<Icon name="insert_drive_file" size={18} style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }} /> }>
+                    <img src={url} style={{ width: "100%", height: "100%", "object-fit": "cover" }} />
+                  </Show>
+                  <Show when={i() === 3 && total() > 4}>
+                    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", display: "flex", "align-items": "center", "justify-content": "center", color: "white", "font-weight": 700 }}>{`+${total() - 3}`}</div>
+                  </Show>
+                </div>
+              )}
+            </For>
+          </div>
+          <div class={styles.attachmentInfo}>
+            <div class={styles.attachmentFilename}>
+              {total()} file(s) selected
+            </div>
+            <div class={styles.attachmentSize}>
+              {files()
+                .slice(0, 3)
+                .map((f) => `${f.name} (${prettyBytes(f.size, 0)})`)
+                .join(" • ")}
+              {total() > 3 ? ` • +${total() - 3} more` : ""}
+            </div>
+            <DropDown
+              class={styles.attachmentUploadToDropDown}
+              title="Upload To"
+              onChange={(item) =>
+                channelProperties.setAttachments(
+                  params.channelId,
+                  files(),
+                  item.id
+                )
+              }
+              items={uploadToOptions()}
+              selectedId={getAttachments()?.uploadTo || getAttachmentFile()?.uploadTo}
             />
           </div>
         </Show>
-        <div class={styles.attachmentInfo}>
-          <div class={styles.attachmentFilename}>
-            {getAttachmentFile()?.file.name}
-          </div>
-          <div class={styles.attachmentSize}>
-            {prettyBytes(getAttachmentFile()!.file.size, 0)}
-          </div>
 
-          <DropDown
-            class={styles.attachmentUploadToDropDown}
-            title="Upload To"
-            onChange={(item) =>
-              channelProperties.setAttachment(
-                params.channelId,
-                undefined,
-                item.id
-              )
-            }
-            items={uploadToOptions()}
-            selectedId={getAttachmentFile()?.uploadTo}
-          />
-        </div>
+        <Show when={!showMulti()}>
+          <Show when={isImage() && !isMoreThan12MB()}>
+            <div class={styles.attachmentImageContainer}>
+              <img
+                onClick={showImageEditor}
+                class={styles.attachmentImage}
+                src={dataUrl()}
+                alt=""
+              />
+              <Button
+                onClick={showImageEditor}
+                class={styles.attachmentEditImageButton}
+                margin={0}
+                padding={6}
+                iconSize={18}
+                styles={{ "margin-left": "auto" }}
+                iconName="brush"
+              />
+            </div>
+          </Show>
+          <div class={styles.attachmentInfo}>
+            <div class={styles.attachmentFilename}>
+              {getAttachmentFile()?.file.name}
+            </div>
+            <div class={styles.attachmentSize}>
+              {prettyBytes(getAttachmentFile()!.file.size, 0)}
+            </div>
+
+            <DropDown
+              class={styles.attachmentUploadToDropDown}
+              title="Upload To"
+              onChange={(item) =>
+                channelProperties.setAttachment(
+                  params.channelId,
+                  undefined,
+                  item.id
+                )
+              }
+              items={uploadToOptions()}
+              selectedId={getAttachmentFile()?.uploadTo}
+            />
+          </div>
+        </Show>
       </div>
     </Floating>
   );
