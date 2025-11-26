@@ -811,7 +811,9 @@ const LocalVideoEmbed = (props: { attachment: RawAttachment }) => {
         name: props.attachment.path?.split("/").reverse()[0]!,
         size: props.attachment.filesize!,
         url: env.NERIMITY_CDN + props.attachment.path!,
-        thumbnailLink: env.NERIMITY_CDN + props.attachment.thumbnailPath!,
+        thumbnailLink: props.attachment.thumbnailPath
+          ? env.NERIMITY_CDN + props.attachment.thumbnailPath
+          : undefined,
         expireAt: props.attachment.expireAt,
         provider: "local",
       }}
