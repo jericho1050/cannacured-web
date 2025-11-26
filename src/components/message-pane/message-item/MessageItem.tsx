@@ -809,9 +809,6 @@ const LocalCdnEmbeds = (props: {
       <Match when={isVideo()}>
         <LocalVideoEmbed attachment={props.attachment} />
       </Match>
-      <Match when={isVideo()}>
-        <LocalVideoEmbed attachment={props.attachment} />
-      </Match>
       <Match when={isAudio()}>
         <LocalAudioEmbed attachment={props.attachment} />
       </Match>
