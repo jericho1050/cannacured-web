@@ -3,10 +3,6 @@ import { classNames, cn, conditionalClass } from "@/common/classNames";
 import {
   formatTimestamp,
   fullDate,
-  fullDateTime,
-  millisecondsToHhMmSs,
-  timeElapsed,
-  timeSince,
   timeSinceMentions,
 } from "@/common/date";
 import Avatar from "@/components/ui/Avatar";
@@ -80,10 +76,8 @@ import { emitScrollToMessage } from "@/common/GlobalEvents";
 import socketClient from "@/chat-api/socketClient";
 import { ServerEvents } from "@/chat-api/EventNames";
 import { electronWindowAPI } from "@/common/Electron";
-import { reactNativeAPI, useReactNativeEvent } from "@/common/ReactNative";
-import { stat } from "fs";
+import { reactNativeAPI } from "@/common/ReactNative";
 import {
-  AudioEmbed,
   GoogleDriveAudioEmbed,
   LocalAudioEmbed,
 } from "./AudioEmbed";
@@ -95,8 +89,7 @@ import { useJoinServer } from "@/chat-api/useJoinServer";
 import { Modal } from "@/components/ui/modal";
 import Text from "@/components/ui/Text";
 import Checkbox from "@/components/ui/Checkbox";
-import { FlexColumn, FlexRow } from "@/components/ui/Flexbox";
-import { css } from "solid-styled-components";
+import { FlexColumn } from "@/components/ui/Flexbox";
 import { StorageKeys, useLocalStorage } from "@/common/localStorage";
 import {
   inviteLinkRegex,
@@ -948,7 +941,6 @@ const TwitterEmbed = (props: { path: string }) => {
 const GoogleDriveVideoEmbed = (props: { attachment: RawAttachment }) => {
   const [file, setFile] = createSignal<gapi.client.drive.File | null>(null);
   const [error, setError] = createSignal<string | undefined>();
-  const [playVideo, setPlayVideo] = createSignal<boolean>(false);
   onMount(async () => {
     await initializeGoogleDrive();
   });
@@ -1047,12 +1039,11 @@ const VideoEmbed = (props: {
         </Show>
         <Show when={props.file && !props.error}>
           <Icon
-            name="insert_drive_file"
+            name="videocam"
             color="var(--primary-color)"
             size={30}
           />
           <div class={styles.fileEmbedDetails}>
-            <div class={styles.fileEmbedName}>{props.file?.name}</div>
             <div class={styles.fileEmbedSize}>
               {prettyBytes(props.file?.size || 0, 0)}
             </div>
